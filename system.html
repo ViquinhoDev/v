@@ -1,1 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viquinho System - Control Panel</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      color: #0f0;
+      font-family: 'Courier New', monospace;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    /* HEADER BLOCK */
+    .header-block {
+      grid-column: 1 / -1;
+      border: 3px solid #0f0;
+      padding: 30px;
+      background: rgba(0, 255, 0, 0.05);
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+
+    .header-block h1 {
+      font-size: 48px;
+      margin-bottom: 15px;
+      text-shadow: 0 0 10px #0f0;
+      letter-spacing: 3px;
+      font-weight: 300;
+    }
+
+    .header-block p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #0c0;
+      opacity: 0.9;
+    }
+
+    /* GRID DE 4 BOTÕES */
+    .blocks-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .block {
+      border: 2px solid #0f0;
+      padding: 25px;
+      background: rgba(0, 255, 0, 0.03);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-height: 200px;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+    }
+
+    .block:hover {
+      background: rgba(0, 255, 0, 0.1);
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+      transform: scale(1.02);
+    }
+
+    .block h3 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      text-shadow: 0 0 10px #0f0;
+      letter-spacing: 2px;
+    }
+
+    .block p {
+      font-size: 14px;
+      opacity: 0.8;
+      line-height: 1.5;
+    }
+
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      border: 2px solid #0f0;
+      background: #000;
+      width: 90%;
+      max-width: 900px;
+      max-height: 80vh;
+      overflow: auto;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 35px;
+      height: 35px;
+      border: 2px solid #0f0;
+      background: #000;
+      color: #0f0;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    .modal-close:hover {
+      background: #0f0;
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+    }
+
+    /* PANEL ESQUERDO - LISTA DE ROBÔS */
+    .robot-list-panel {
+      padding: 30px 20px;
+      border-right: 2px solid #0f0;
+      overflow-y: auto;
+    }
+
+    .robot-list-panel h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #0f0;
+      text-align: center;
+    }
+
+    .robot-item {
+      border: 1px solid #0f0;
+      padding: 15px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      background: rgba(0, 255, 0, 0.05);
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .robot-item:hover {
+      background: rgba(0, 255, 0, 0.15);
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+    }
+
+    .robot-item.active {
+      background: rgba(0, 255, 0, 0.2);
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+    }
+
+    .robot-name {
+      font-weight: bold;
+    }
+
+    .arrow {
+      color: #0f0;
+      font-size: 20px;
+    }
+
+    /* PANEL DIREITO - DETALHES */
+    .robot-detail-panel {
+      padding: 30px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .detail-message {
+      font-size: 18px;
+      text-align: center;
+      color: #ff6b6b;
+      text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+    }
+
+    .checklist {
+      list-style: none;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #0f0;
+      background: rgba(0, 255, 0, 0.05);
+    }
+
+    .checklist-item.checked {
+      background: rgba(0, 255, 0, 0.15);
+    }
+
+    .checkbox {
+      width: 30px;
+      height: 30px;
+      border: 2px solid #0f0;
+      margin-right: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .checkbox.checked {
+      background: #0f0;
+      color: #000;
+      font-weight: bold;
+    }
+
+    .checkbox-label {
+      font-size: 14px;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .unlock-button {
+      margin-top: 30px;
+      padding: 15px 30px;
+      border: 2px solid #0f0;
+      background: #0f0;
+      color: #000;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.3s ease;
+      display: none;
+    }
+
+    .unlock-button.visible {
+      display: block;
+    }
+
+    .unlock-button:hover {
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+      transform: scale(1.05);
+    }
+
+    /* IP BLOCK */
+    .ip-details {
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .ip-detail-item {
+      margin: 10px 0;
+      padding: 8px;
+      border-left: 2px solid #0f0;
+      padding-left: 15px;
+    }
+
+    .ip-detail-label {
+      color: #0c0;
+      font-weight: bold;
+    }
+
+    /* NOTES BLOCK */
+    .notes-container {
+      width: 100%;
+      height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .notes-toolbar {
+      border-bottom: 2px solid #0f0;
+      padding: 15px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .notes-button {
+      padding: 8px 12px;
+      border: 1px solid #0f0;
+      background: #000;
+      color: #0f0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .notes-button:hover {
+      background: #0f0;
+      color: #000;
+    }
+
+    .notes-textarea {
+      flex: 1;
+      border: none;
+      background: #000;
+      color: #0f0;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      padding: 15px;
+      resize: none;
+      outline: none;
+    }
+
+    @media (max-width: 768px) {
+      .blocks-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        grid-template-columns: 1fr;
+        max-height: 90vh;
+      }
+
+      .robot-list-panel {
+        border-right: none;
+        border-bottom: 2px solid #0f0;
+        max-height: 300px;
+      }
+
+      .header-block h1 {
+        font-size: 32px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- HEADER BLOCK -->
+    <div class="header-block">
+      <h1>VIQUINHO SYSTEM</h1>
+      <p>Sistema avançado de controle de robôs autônomos com interface hacker. Acesso a ferramentas de monitoramento, controle de dispositivos RoboCore e gerenciamento de rede. Conectado e pronto para operação.</p>
+    </div>
+
+    <!-- 4 BLOCOS -->
+    <div class="blocks-grid">
+      <!-- BLOCO 1: IP -->
+      <div class="block" onclick="openIPPanel()">
+        <h3>📡 NETWORK</h3>
+        <p>Informações de Rede e Localização</p>
+      </div>
+
+      <!-- BLOCO 2: NOTES -->
+      <div class="block" onclick="openNotesPanel()">
+        <h3>📝 NOTES</h3>
+        <p>Bloco de Anotações com Formatação</p>
+      </div>
+
+      <!-- BLOCO 3: ROBOT CONTROL -->
+      <div class="block" onclick="openRobotPanel()">
+        <h3>🤖 ROBOCORE</h3>
+        <p>Controle de Robôs RoboExplorer</p>
+      </div>
+
+      <!-- BLOCO 4: PORTFOLIO -->
+      <div class="block" onclick="window.open('https://viquinhodv.github.io', '_blank')">
+        <h3>💼 PORTFOLIO</h3>
+        <p>ViquinhoDev GitHub Portfolio</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL IP -->
+  <div class="modal" id="ipModal">
+    <div class="modal-content" style="grid-template-columns: 1fr; max-width: 600px;">
+      <button class="modal-close" onclick="closeIPPanel()">✕</button>
+      <div style="padding: 30px;">
+        <h2 style="font-size: 24px; margin-bottom: 25px; text-shadow: 0 0 10px #0f0;">NETWORK INFO</h2>
+        <div class="ip-details" id="ipDetails">
+          <div class="ip-detail-item">
+            <span class="ip-detail-label">IPv4:</span> <span id="ipv4">Carregando...</span>
+          </div>
+          <div class="ip-detail-item">
+            <span class="ip-detail-label">IPv6:</span> <span id="ipv6">Carregando...</span>
+          </div>
+          <div class="ip-detail-item">
+            <span class="ip-detail-label">País:</span> <span id="country">Carregando...</span>
+          </div>
+          <div class="ip-detail-item">
+            <span class="ip-detail-label">Estado/Região:</span> <span id="region">Carregando...</span>
+          </div>
+          <div class="ip-detail-item">
+            <span class="ip-detail-label">Cidade:</span> <span id="city">Carregando...</span>
+          </div>
+          <div class="ip-detail-item">
+            <span class="ip-detail-label">ISP:</span> <span id="isp">Carregando...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NOTES -->
+  <div class="modal" id="notesModal">
+    <div class="modal-content" style="grid-template-columns: 1fr; max-width: 800px; max-height: 90vh;">
+      <button class="modal-close" onclick="closeNotesPanel()">✕</button>
+      <div style="display: flex; flex-direction: column; height: 100%;">
+        <div class="notes-toolbar">
+          <button class="notes-button" onclick="formatText('bold')"><strong>B</strong></button>
+          <button class="notes-button" onclick="formatText('italic')"><em>I</em></button>
+          <button class="notes-button" onclick="formatText('underline')<u>U</u></button>
+          <button class="notes-button" onclick="formatText('strikethrough')"><s>S</s></button>
+          <button class="notes-button" onclick="formatText('clear')">Limpar</button>
+          <button class="notes-button" onclick="formatText('download')">Download</button>
+        </div>
+        <textarea class="notes-textarea" id="notesTextarea" placeholder="Digite suas anotações aqui..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ROBOT CONTROL -->
+  <div class="modal" id="robotModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeRobotPanel()">✕</button>
+      
+      <!-- PAINEL ESQUERDO -->
+      <div class="robot-list-panel">
+        <h2>Selecione o Robô</h2>
+        <div id="robotList"></div>
+      </div>
+
+      <!-- PAINEL DIREITO -->
+      <div class="robot-detail-panel" id="detailPanel">
+        <p style="text-align: center; color: #888;">Selecione um robô para ver detalhes</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="local.js"></script>
+  <script src="controller.js"></script>
+
+</body>
+
+</html>
